@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API</title>
+    <style>
+        body {
+            font-family:  sans-serif;
+            background-color: grey;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; 
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #c0b8b8;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            margin-top: 20px; 
+        }
+        .post-card {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        }
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+        .post-card h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 10px;
+        }
+        .post-card p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #4b5563;
+        }
+        .loading-message {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #6b7280;
+            padding: 20px;
+        }
+        .error-message {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #dc2626;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center mb-8 text-gray-800">Posts from JSONPlaceholder</h1>
+        <div id="posts-container" class="space-y-6">
+            
+            <div class="loading-message" id="loading-message">Loading posts...</div>
+        </div>
+    </div>
+
+    <script>
+        const postsContainer = document.getElementById('posts-container');
+        const loadingMessage = document.getElementById('loading-message');
+
+        async function fetchAndDisplayPosts(url) {
+            try {
+                loadingMessage.style.display = 'block';
+                postsContainer.innerHTML = '<div class="loading-message" id="loading-message">Loading posts...</div>';
+
+                const response = await fetch(url);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const posts = await response.json();
+
+                loadingMessage.style.display = 'none';
+                postsContainer.innerHTML = ''; 
+
+                posts.slice(0, 5).forEach(post => {
+                    
+                    const postCard = document.createElement('div');
+                    postCard.classList.add('post-card'); 
+
+                    const titleElement = document.createElement('h2');
+                    titleElement.textContent = post.title;
+
+                    const bodyElement = document.createElement('p');
+                    bodyElement.textContent = post.body;
+
+                    postCard.appendChild(titleElement);
+                    postCard.appendChild(bodyElement);
+                    postsContainer.appendChild(postCard);
+                });
+
+            } catch (error) {
+                console.error('Error fetching or parsing data:', error);
+                postsContainer.innerHTML = `
+                    <div class="error-message">
+                        Failed to load posts. Please try again later.
+                        <br>
+                        Error: ${error.message}
+                    </div>
+                `;
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchAndDisplayPosts('https://jsonplaceholder.typicode.com/posts');
+        });
+    </script>
+</body>
+</html>
